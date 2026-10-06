@@ -1,0 +1,714 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Машинный аудит смет и исполнительной документации">
+<title>Машинный аудит ПТО</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: one long scroll; editorial left-aligned columns on a paper ground, iso quarter as the living hero; terracotta reserved for money. */
+:root{
+  --paper:#F4F1EA; --paper-2:#EDE6DC; --card:#FBFAF6;
+  --ink:#1C1E20; --ink-2:#5E5B57; --line:#E0DAD0; --line-2:#D3CABC;
+  --terra:#A9502B; --terra-l:#E2B59B; --terra-ink:#F7F1EA;
+  --night:#1C1F21; --night-ink:#F4F1EA; --night-ink-2:#BDB8AF; --night-line:#34383C;
+  --f-display:'Manrope', 'Segoe UI', Arial, sans-serif;
+  --f-mono:'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  --r:3px;
+  --gutter:clamp(16px, 4vw, 40px);
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-display);font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:inherit}
+button{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--terra);outline-offset:3px;border-radius:var(--r)}
+.wrap{max-width:1240px;margin-inline:auto;padding-inline:var(--gutter)}
+.eyebrow{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--terra);margin:0}
+h1,h2,h3{margin:0;font-weight:300;text-wrap:balance;letter-spacing:-.025em}
+h1{font-size:clamp(42px,6.2vw,88px);line-height:1.02}
+h2{font-size:clamp(32px,4.2vw,56px);line-height:1.08}
+h3{font-size:20px;font-weight:600;letter-spacing:-.01em;line-height:1.3}
+p{margin:0}
+.muted{color:var(--ink-2)}
+.num{font-variant-numeric:tabular-nums;font-weight:300;letter-spacing:-.035em;line-height:1}
+.sec{padding-block:clamp(64px,9vw,120px);scroll-margin-top:64px}
+.sec-head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:16px 40px;margin-bottom:clamp(32px,4vw,56px)}
+.sec-head .titles{display:flex;flex-direction:column;gap:14px;min-width:0}
+.sec-head .aside{max-width:440px;color:var(--ink-2);font-size:16px}
+
+/* header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(244,241,234,.9);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;gap:24px;height:60px}
+.brand{font-family:var(--f-mono);font-size:13px;letter-spacing:.04em;text-decoration:none;white-space:nowrap;margin-right:auto}
+.nav{display:flex;gap:4px}
+.nav a{font-size:14px;text-decoration:none;color:var(--ink-2);padding:6px 10px;border-radius:var(--r);transition:color .2s,background .2s}
+.nav a:hover{color:var(--ink)}
+.nav a.on{color:var(--ink);background:var(--paper-2)}
+.btn{display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:var(--paper);text-decoration:none;border:0;border-radius:var(--r);padding:12px 18px;font-size:15px;font-weight:500;cursor:pointer;transition:background .2s,transform .2s;white-space:nowrap}
+.btn:hover{background:var(--terra)}
+.btn .arr{transition:transform .2s}
+.btn:hover .arr{transform:translateX(3px)}
+.btn.sm{padding:9px 14px;font-size:14px}
+@media (max-width:900px){.nav{display:none}}
+.b-short{display:none}
+@media (max-width:560px){.b-long{display:none}.b-short{display:inline}.top .wrap{gap:12px}}
+
+/* hero */
+.hero{padding-block:clamp(32px,5vw,64px) 0;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:24px;align-items:center}
+.hero-text{display:flex;flex-direction:column;gap:28px;padding-block:24px;position:relative;z-index:2}
+.lead{font-size:clamp(17px,1.5vw,20px);color:var(--ink-2);max-width:34em}
+.hero-art{position:relative;aspect-ratio:1/1.02;max-width:100%;will-change:transform}
+.hero-art canvas,.final-art canvas{width:100%;height:100%;display:block}
+.strip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line-2);margin-top:clamp(24px,3vw,40px)}
+.strip > div{padding:24px 24px 28px 0;display:flex;flex-direction:column;gap:8px;min-width:0}
+.strip > div + div{padding-left:24px;border-left:1px solid var(--line)}
+.strip .num{font-size:clamp(36px,4.4vw,60px)}
+.strip .num small{font-size:.42em;letter-spacing:0;margin-left:6px;font-weight:400}
+.strip .lbl{font-size:15px;color:var(--ink-2)}
+@media (max-width:820px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-art{order:-1;width:min(100%,420px);margin-inline:auto}
+  .strip{grid-template-columns:1fr}
+  .strip > div + div{padding-left:0;border-left:0;border-top:1px solid var(--line)}
+}
+
+/* services */
+.svc-hint{font-family:var(--f-mono);font-size:12.5px;letter-spacing:.06em;color:var(--ink-2)}
+.svc-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.svc{position:relative;text-align:left;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:24px 24px 26px;display:flex;flex-direction:column;gap:14px;cursor:help;min-height:200px;transition:border-color .2s,transform .25s,background .2s}
+.svc:hover{border-color:var(--ink-2);transform:translateY(-2px)}
+.svc .tick{position:absolute;top:20px;right:20px;width:22px;height:22px;border:1.5px solid currentColor;border-radius:2px;opacity:.55;display:grid;place-items:center;transition:opacity .2s,background .2s}
+.svc .tick svg{width:14px;height:14px;opacity:0;transition:opacity .2s}
+.svc[aria-pressed="true"] .tick{opacity:1;background:var(--ink);border-color:var(--ink)}
+.svc[aria-pressed="true"] .tick svg{opacity:1}
+.svc[aria-pressed="true"]{border-color:var(--ink)}
+.svc h3{padding-right:0}
+.svc p{color:var(--ink-2);font-size:15.5px}
+.svc.hot{background:var(--terra);border-color:var(--terra);color:var(--terra-ink)}
+.svc.hot p{color:var(--terra-ink);opacity:.92}
+.svc.hot[aria-pressed="true"] .tick{background:var(--terra-ink);border-color:var(--terra-ink)}
+.svc.hot[aria-pressed="true"] .tick svg path{stroke:var(--terra)}
+.svc.hot[aria-pressed="true"]{border-color:var(--ink)}
+@media (max-width:1040px){.svc-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.svc-grid{grid-template-columns:1fr}.svc{min-height:0}}
+
+/* system */
+.sys{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.82fr);gap:clamp(24px,4vw,56px);align-items:stretch}
+.checks{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-2)}
+.checks li{border-bottom:1px solid var(--line-2)}
+.checks .row{display:flex;align-items:center;gap:18px;padding:18px 4px;font-size:clamp(19px,1.8vw,24px);width:100%;background:none;border:0;text-align:left;cursor:default}
+.checks .row.go{cursor:pointer}
+.checks .row .ico{width:28px;height:28px;flex:none;color:#3F5F7A}
+.checks .row .go-arr{margin-left:auto;font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--ink-2);opacity:0;transform:translateX(-4px);transition:opacity .2s,transform .2s}
+.checks .row.go:hover .go-arr,.checks .row.go:focus-visible .go-arr{opacity:1;transform:none}
+.checks .row:hover{background:linear-gradient(90deg,var(--card),transparent)}
+.checks .row.money{color:var(--terra);font-weight:600}
+.checks .row.money .ico{color:var(--terra)}
+.dark{background:var(--night);color:var(--night-ink);border-radius:var(--r);padding:clamp(28px,3.4vw,48px);display:flex;flex-direction:column;justify-content:space-between;gap:28px}
+.dark .eyebrow{color:var(--terra-l)}
+.dark .pt h3{font-size:clamp(20px,1.9vw,26px);font-weight:600;color:var(--night-ink)}
+.dark .pt p{color:var(--night-ink-2);margin-top:4px}
+.dark .note{color:var(--terra-l)}
+@media (max-width:900px){.sys{grid-template-columns:1fr}}
+
+/* value */
+.val-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.tile{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:clamp(24px,2.6vw,36px);display:flex;flex-direction:column;gap:20px;min-width:0}
+.tile .num{font-size:clamp(64px,7.6vw,112px)}
+.tile .num small{font-size:.36em;letter-spacing:0;margin-left:8px;font-weight:400}
+.tile p.cap{color:var(--ink-2)}
+.tile.terra{background:var(--terra);border-color:var(--terra);color:var(--terra-ink)}
+.tile.terra .eyebrow,.tile.terra p.cap{color:var(--terra-ink)}
+.tile.link{cursor:pointer;transition:transform .25s,border-color .2s}
+.tile.link:hover{transform:translateY(-3px)}
+.tile.link .more{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;margin-top:auto;opacity:.75}
+.band{margin-top:16px;background:var(--night);color:var(--night-ink);border-radius:var(--r);padding:26px clamp(24px,3vw,40px);display:flex;align-items:center;gap:28px;flex-wrap:wrap;font-size:clamp(18px,1.8vw,24px);font-weight:500}
+.band .flow{width:48px;height:20px;flex:none;color:var(--terra-l)}
+.band span{min-width:0}
+@media (max-width:860px){.val-grid{grid-template-columns:1fr}}
+
+/* method */
+.meth{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr) auto minmax(0,1fr);gap:14px;align-items:stretch}
+.plus{align-self:center;font-size:48px;font-weight:300;color:var(--terra);line-height:1}
+.mcard{background:var(--card);border-top:3px solid var(--terra);border-radius:0 0 var(--r) var(--r);padding:28px;display:grid;grid-template-rows:auto auto auto 1fr auto auto;gap:12px;min-width:0}
+.mcard h3{min-height:2.6em}
+.mcard .how{min-height:4.65em}
+.mcard .k{font-family:var(--f-mono);font-size:12px;letter-spacing:.12em;color:var(--ink-2);padding-top:14px;border-top:1px solid var(--line)}
+.mcard .big{font-size:clamp(36px,3.6vw,52px);color:var(--terra);margin-top:8px;white-space:nowrap}
+.mcard .cap{color:var(--ink);font-size:15.5px;min-height:3.1em}
+@media (max-width:960px){.meth{grid-template-columns:1fr}.plus{justify-self:center;font-size:36px}}
+
+/* project numbers */
+.pgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.pgrid .tile .num{font-size:clamp(56px,6.4vw,96px)}
+.tile.ink{background:var(--night);border-color:var(--night);color:var(--night-ink)}
+.tile.ink .eyebrow{color:var(--terra-l)}
+.tile.ink p.cap{color:var(--night-ink-2)}
+@media (max-width:860px){.pgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.pgrid{grid-template-columns:1fr}}
+
+/* money */
+.money{background:var(--terra);color:var(--terra-ink)}
+.money .eyebrow{color:var(--terra-ink)}
+.money-top{display:flex;justify-content:space-between;align-items:start;gap:24px;flex-wrap:wrap}
+.toggle{display:inline-flex;border:1px solid rgba(247,241,234,.55);border-radius:var(--r);padding:3px;gap:3px}
+.toggle button{background:none;border:0;padding:8px 14px;border-radius:2px;font-size:14px;cursor:pointer;color:var(--terra-ink)}
+.toggle button[aria-pressed="true"]{background:var(--terra-ink);color:var(--terra)}
+.money .hero-num{font-size:clamp(72px,12vw,200px);margin-top:28px}
+.money .sub{font-size:clamp(19px,2.2vw,30px);font-weight:300;max-width:30em;margin-top:18px;line-height:1.3}
+.rbar{display:flex;gap:4px;margin-top:clamp(40px,5vw,64px);height:64px;align-items:center}
+.rseg{height:44px;border-radius:2px;cursor:pointer;transition:height .25s ease,opacity .25s ease,flex-basis .6s ease;position:relative;transform-origin:left center}
+.rseg.s1{background:var(--terra-ink)}
+.rseg.s2{background:var(--terra-l)}
+.rseg.s3{border:2px solid var(--terra-ink)}
+.rbar.dim .rseg:not(.on){opacity:.35}
+.rseg.on{height:64px}
+.rlabels{display:flex;gap:4px;margin-top:18px}
+.rlabels > div{padding-right:24px;display:flex;flex-direction:column;gap:6px;min-width:0;transition:opacity .3s}
+.rlabels .v{font-size:clamp(24px,2.6vw,40px);font-weight:500;letter-spacing:-.02em}
+.rlabels .t{font-size:15px;opacity:.95}
+.money.now .rseg.s2,.money.now .rseg.s3{opacity:.12;pointer-events:none}
+.money.now .rlabels .l2,.money.now .rlabels .l3{opacity:0}
+.money .foot{margin-top:36px;padding-top:20px;border-top:1px solid rgba(247,241,234,.35);font-size:16px}
+@media (max-width:720px){
+  .rlabels{flex-direction:column;gap:18px}
+  .rlabels > div{flex-basis:auto!important;padding-right:0}
+}
+
+/* remarks */
+.rem{display:grid;grid-template-columns:minmax(0,.62fr) minmax(0,1.38fr);gap:clamp(32px,5vw,80px)}
+.rem-left{display:flex;flex-direction:column;gap:28px}
+.rem-left .num{font-size:clamp(96px,13vw,200px)}
+.split{display:flex;gap:4px;height:22px}
+.split .c{flex:3;background:var(--terra);cursor:pointer;border-radius:2px}
+.split .s{flex:71;background:var(--ink);border-radius:2px}
+.split-l{display:flex;justify-content:space-between;font-size:15px;margin-top:10px}
+.crit{background:var(--card);border-left:3px solid var(--terra);padding:18px 20px;font-size:15.5px}
+.chart{display:flex;flex-direction:column;gap:6px}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) 48px;gap:6px 16px;padding:12px 8px;border-radius:var(--r);cursor:default;transition:opacity .25s,background .25s}
+.crow .nm{font-size:clamp(17px,1.6vw,21px);font-weight:600}
+.crow .ex{font-size:14.5px;color:var(--ink-2);font-weight:400;margin-left:10px}
+.crow .n{text-align:right;font-size:20px;font-weight:600;font-variant-numeric:tabular-nums}
+.crow .track{grid-column:1/-1;height:10px;background:#E6DFD3;border-radius:2px;overflow:hidden}
+.crow .bar{height:100%;width:var(--w);background:var(--ink);transform-origin:left center;transition:background .25s,transform .35s ease}
+.chart.has-active .crow:not(.on){opacity:.4}
+.crow.on .bar{background:var(--terra);transform:scaleX(1.03)}
+.crow.flash{background:var(--paper-2)}
+@media (max-width:900px){.rem{grid-template-columns:1fr}.crow .ex{display:block;margin-left:0;margin-top:2px}}
+
+/* final */
+.final{background:var(--night);color:var(--night-ink);overflow:hidden}
+.final-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.95fr);gap:24px;align-items:center}
+.final .eyebrow{color:var(--terra-l)}
+.final h2{font-size:clamp(40px,6vw,88px);margin-top:20px}
+.steps{list-style:none;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.steps li{border-top:2px solid var(--terra-l);padding-top:16px;display:flex;flex-direction:column;gap:8px}
+.steps .i{font-family:var(--f-mono);font-size:13px;color:var(--terra-l)}
+.chosen{margin-top:36px;display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;padding:18px 20px;border:1px solid var(--night-line);border-radius:var(--r);color:var(--night-ink-2)}
+.chosen b{color:var(--night-ink);font-weight:500}
+.chosen .btn{background:var(--night-ink);color:var(--night)}
+.chosen .btn:hover{background:var(--terra-l)}
+.final-art{aspect-ratio:1/1.02;max-width:100%}
+.foot-line{border-top:1px solid var(--night-line);margin-top:clamp(48px,6vw,80px);padding-block:24px;font-family:var(--f-mono);font-size:12.5px;color:var(--night-ink-2)}
+@media (max-width:860px){.final-grid{grid-template-columns:1fr}.final-art{width:min(100%,420px);margin-inline:auto;order:-1}.steps{grid-template-columns:1fr}}
+
+/* tooltip */
+.tip{position:fixed;z-index:50;left:0;top:0;max-width:300px;background:var(--ink);color:var(--paper);border-radius:var(--r);padding:12px 14px;font-size:14px;line-height:1.4;pointer-events:none;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s}
+.tip.show{opacity:1;transform:none}
+.tip .tb{display:block;font-size:22px;font-weight:500;letter-spacing:-.02em;margin-bottom:3px;color:var(--terra-l)}
+.tip ul{margin:6px 0 0;padding-left:16px}
+.tip .ph{color:var(--terra-l);font-family:var(--f-mono);font-size:12.5px}
+[data-tip]{cursor:help}
+.svc[data-tip],.tile.link[data-tip],.checks .row.go[data-tip],.rseg[data-tip],.crow[data-tip],.split .c[data-tip]{cursor:pointer}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:var(--r);font-size:14px;opacity:0;transition:opacity .2s,transform .2s;z-index:60}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* reveal: only elements below the fold at load are hidden, by script */
+.pre{opacity:0;transform:translateY(20px)}
+.rv{transition:opacity .6s ease,transform .6s cubic-bezier(.2,.7,.2,1)}
+.grow-pre .bar{transform:scaleX(0)}
+.grow-pre .rseg{transform:scaleX(0)}
+.bar,.rseg{transition-property:background,transform,height,opacity,flex-basis}
+@media (prefers-reduced-motion: reduce){.pre{opacity:1;transform:none}.grow-pre .bar,.grow-pre .rseg{transform:none}*{transition-duration:0s!important}}
+.ph-fill{color:var(--terra);font-family:var(--f-mono);font-size:.85em}
+</style>
+</head>
+<body>
+
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top"><span class="b-long">Машинный аудит документации ПТО</span><span class="b-short">Аудит ПТО</span></a>
+    <nav class="nav" aria-label="Разделы">
+      <a href="#services">Услуги</a>
+      <a href="#check">Проверка</a>
+      <a href="#value">Выгода</a>
+      <a href="#project">Пример</a>
+      <a href="#remarks">Замечания</a>
+    </nav>
+    <a class="btn sm" href="#start">Начать с объекта <span class="arr">→</span></a>
+  </div>
+</header>
+
+<main>
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="hero-text">
+      <p class="eyebrow">ПТО · Сметы · Исполнительная документация</p>
+      <h1>Больше денег из закрытия объекта</h1>
+      <p class="lead">Машинный аудит смет и исполнительной документации и команда ПТО: находим основания для увеличения стоимости и устраняем замечания до сдачи</p>
+    </div>
+    <div class="hero-art" id="heroArt"><canvas id="qDay" role="img" aria-label="Изометрическая модель квартала с плоскостью проверки"></canvas></div>
+  </div>
+  <div class="wrap">
+    <div class="strip">
+      <div><span class="num" data-to="7.15" data-dec="2">7,15</span><span class="lbl">млн ₽ резерва к стоимости закрытия</span></div>
+      <div><span class="num" data-to="74">74</span><span class="lbl">замечания найдены до заказчика</span></div>
+      <div><span class="num"><span data-to="100">100</span><small>%</small></span><span class="lbl">документов проверено</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="services" data-nav="services">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">01 · Система и команда ПТО</p><h2>Что мы делаем для вас</h2></div>
+      <p class="aside">От одного журнала, сметы или схемы до документального сопровождения объекта.</p>
+    </div>
+    <div class="svc-grid" id="svcGrid">
+      <div class="svc hot rv-el" tabindex="0" data-name="Составление и проверка смет" data-tip-b="107,2 млн ₽" data-tip="смет проверено построчно · резерв 7,15 млн ₽"><h3>Составление и проверка смет</h3><p>Находим пропущенные позиции и деньги</p></div>
+      <div class="svc hot rv-el" tabindex="0" data-name="Проверка ИД" data-tip-b="74 замечания" data-tip="найдены до заказчика, 3 из них критические"><h3>Проверка ИД</h3><p>Замечания — до заказчика, а не после</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Подготовка и переоформление ИД" data-tip-b="27 замечаний" data-tip="по оформлению: штамп и расшифровка подписи расходятся"><h3>Подготовка и переоформление ИД</h3><p>Акты и журналы по формам заказчика</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Сертификаты и паспорта" data-tip-b="13 замечаний" data-tip="нет документа о качестве на партию"><h3>Сертификаты и паспорта</h3><p>Сверяем и запрашиваем недостающие</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Исполнительные схемы в AutoCAD" data-tip-b="14 замечаний" data-tip="объём в акте не подтверждён схемой"><h3>Исполнительные схемы в AutoCAD</h3><p>Из сканов и замеров — в DWG и PDF</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Оцифровка журналов и сканов" data-tip-b="5 371 лист" data-tip="прочитан со сканов, каждое число сверено с изображением"><h3>Оцифровка журналов и сканов</h3><p>Рукописное — в Word и Excel</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Систематизация готовых схем" data-tip-b="7 расхождений" data-tip="перекрёстных: даты и номера актов не сходятся"><h3>Систематизация готовых схем</h3><p>Порядок листов, редакции, дубли</p></div>
+      <div class="svc rv-el" tabindex="0" data-name="Сборка комплектов и реестры" data-tip-b="25 документов" data-tip="готовых для заказчика, ПТО и руководства"><h3>Сборка комплектов и реестры</h3><p>Комплект для согласования и печати</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="check" data-nav="check" style="background:var(--paper-2)">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">01 · Система</p><h2>Что проверяет система</h2></div>
+    </div>
+    <div class="sys">
+      <ul class="checks rv-el">
+        <li><button class="row go" data-goto="r-kompl" data-tip-b="11 замечаний" data-tip="нет актов скрытых работ и испытаний"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="14" cy="14" r="10.5"/><path d="M9.5 14.3l3 2.9 6-6.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Комплектность документов<span class="go-arr">к замечаниям ↓</span></button></li>
+        <li><button class="row go" data-goto="r-oform" data-tip-b="27 замечаний" data-tip="самая частая категория"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M7 4.5h10l4 4v15H7z"/><path d="M11 13h7M11 17h7M11 21h4" stroke-linecap="round"/></svg>Оформление и реквизиты<span class="go-arr">к замечаниям ↓</span></button></li>
+        <li><button class="row go" data-goto="r-obem" data-tip-b="14 замечаний" data-tip="объём в акте не подтверждён схемой"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 22.5h18"/><path d="M8 22V14M13 22V8M18 22v-6M23 22V11" stroke-linecap="round"/></svg>Объёмы работ<span class="go-arr">к замечаниям ↓</span></button></li>
+        <li><button class="row go" data-goto="r-kach" data-tip-b="13 замечаний" data-tip="нет документа о качестве на партию"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M14 4l8 3.5v6c0 5-3.4 8.6-8 10.5-4.6-1.9-8-5.5-8-10.5v-6z"/><path d="M10.5 14l2.5 2.5 4.5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>Качество материалов<span class="go-arr">к замечаниям ↓</span></button></li>
+        <li><div class="row" tabindex="0" data-tip-b="107,2 млн ₽" data-tip="смет проверено построчно"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><ellipse cx="14" cy="7.5" rx="8" ry="3"/><path d="M6 7.5v13c0 1.7 3.6 3 8 3s8-1.3 8-3v-13M6 14c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>Сметы и расценки</div></li>
+        <li><div class="row" tabindex="0" data-tip-b="42 акта" data-tip-html="&lt;ul&gt;&lt;li&gt;Приказ Минстроя № 344/пр&lt;/li&gt;&lt;li&gt;Постановление Правительства № 468&lt;/li&gt;&lt;/ul&gt;Проверяем: действует ли акт, применим ли пункт, дословна ли цитата"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 6.5c3-1.4 6-1.4 9 0v16c-3-1.4-6-1.4-9 0zM14 6.5c3-1.4 6-1.4 9 0v16c-3-1.4-6-1.4-9 0z"/></svg>Правовая база — 42 акта</div></li>
+        <li><div class="row money" tabindex="0" data-tip-b="8 способов" data-tip-html="Например:&lt;ul&gt;&lt;li&gt;Замена расценки по составу нормы&lt;/li&gt;&lt;li&gt;Неучтённые объёмы&lt;/li&gt;&lt;li&gt;Неучтённые материалы&lt;/li&gt;&lt;li&gt;Коэффициенты условий работ&lt;/li&gt;&lt;li&gt;Отсутствующие позиции&lt;/li&gt;&lt;/ul&gt;"><svg class="ico" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="10" cy="14" r="5"/><path d="M15 14h10M21 14v4M25 14v3" stroke-linecap="round"/></svg>Деньги — 8 способов увеличить стоимость</div></li>
+      </ul>
+      <div class="dark rv-el">
+        <p class="eyebrow">Почему цифрам можно верить</p>
+        <div class="pt"><h3>Каждое число — со скана листа</h3><p>а не из распознанного текста</p></div>
+        <div class="pt"><h3>Каждый вывод проверен дважды</h3><p>вторая роль подтверждает первую</p></div>
+        <div class="pt"><h3>Ошибочные находки отсекаются</h3><p>до передачи заказчику</p></div>
+        <p class="note">Решения остаются за вами: система готовит и доказывает</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="value" data-nav="value">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">02 · Выгода</p><h2>Что получает собственник</h2></div>
+    </div>
+    <div class="val-grid">
+      <div class="tile terra link rv-el" data-jump="money" tabindex="0" data-tip-b="6,7 %" data-tip="от проверенных смет на 107,2 млн ₽; 2,84 млн можно предъявить сразу">
+        <p class="eyebrow">Деньги</p>
+        <span class="num"><span data-to="7.15" data-dec="2">7,15</span><small>млн ₽</small></span>
+        <p class="cap">резерв к стоимости закрытия по 7 крупнейшим позициям — 6,7 % от проверенных смет на 107,2 млн ₽</p>
+        <span class="more">Разбор резерва ↓</span>
+      </div>
+      <div class="tile link rv-el" data-jump="remarks" tabindex="0" data-tip-b="3 критических" data-tip="замечания — основание не подписать акт или удержать оплату">
+        <p class="eyebrow">Защита оплаты</p>
+        <span class="num" data-to="74">74</span>
+        <p class="cap">замечания найдены до заказчика; 3 из них — основание не подписать акт или удержать оплату</p>
+        <span class="more">К замечаниям ↓</span>
+      </div>
+      <div class="tile rv-el" tabindex="0" data-tip-b="226 документов, 5 371 лист" data-tip="в 30 раз быстрее ручной проверки">
+        <p class="eyebrow">Скорость и охват</p>
+        <span class="num"><span data-to="100">100</span><small>%</small></span>
+        <p class="cap">документов проверено — в 30 раз быстрее ручной проверки, экономия 845 чел.-ч</p>
+      </div>
+    </div>
+    <div class="band rv-el">
+      <span>Система находит и доказывает</span>
+      <svg class="flow" viewBox="0 0 48 20" aria-hidden="true"><path d="M2 10h40M34 3l8 7-8 7" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>команда ПТО исправляет, дооформляет и собирает комплект</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="method" style="background:var(--paper-2)">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">02 · Выгода</p><h2>Как мы считаем выгоду</h2></div>
+    </div>
+    <div class="meth">
+      <div class="mcard rv-el">
+        <p class="eyebrow">Стоимость</p>
+        <h3>Дополнительная стоимость закрытия</h3>
+        <p class="k">КАК СЧИТАЕМ</p>
+        <p class="how">Только суммы с подтверждением; взаимоисключающие варианты не складываем</p>
+        <span class="num big"><span data-to="7.15" data-dec="2">7,15</span> млн ₽</span>
+        <p class="cap">2,84 млн — сразу, остальное — после документов</p>
+      </div>
+      <span class="plus" aria-hidden="true">+</span>
+      <div class="mcard rv-el">
+        <p class="eyebrow">Оплата</p>
+        <h3>Сохранённая оплата</h3>
+        <p class="k">КАК СЧИТАЕМ</p>
+        <p class="how">Акты, по которым замечания закрыты до сдачи и оплата не задержана</p>
+        <span class="num big" data-to="3">3</span>
+        <p class="cap">критических замечания найдены до заказчика</p>
+      </div>
+      <span class="plus" aria-hidden="true">+</span>
+      <div class="mcard rv-el">
+        <p class="eyebrow">Время</p>
+        <h3>Высвобожденное время ПТО</h3>
+        <p class="k">КАК СЧИТАЕМ</p>
+        <p class="how">Норма ручной проверки — 0,2 ч на лист А4 — против машинного прогона</p>
+        <span class="num big" tabindex="0" data-tip-b="0,2 ч на лист А4" data-tip="норма ручной проверки"><span data-to="845">845</span> чел.-ч</span>
+        <p class="cap">экономии ПТО — в 30 раз быстрее ручной проверки</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="project" data-nav="project">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">03 · Пример проекта</p><h2>Проект в цифрах</h2></div>
+      <p class="aside">Два объекта, общий итог: от приёма комплекта до выпуска документов</p>
+    </div>
+    <div class="pgrid">
+      <div class="tile rv-el"><p class="eyebrow">Документы</p><span class="num" data-to="226">226</span><p class="cap">документов обработано, охват комплекта 100 %</p></div>
+      <div class="tile rv-el"><p class="eyebrow">Листы</p><span class="num" data-to="5371">5 371</span><p class="cap">лист прочитан со сканов, каждое число сверено с изображением</p></div>
+      <div class="tile rv-el" tabindex="0" data-tip-b="4 379" data-tip="проверенных фактов записано в реестр"><p class="eyebrow">Факты</p><span class="num" data-to="4379">4 379</span><p class="cap">проверенных фактов записано в реестр</p></div>
+      <div class="tile rv-el"><p class="eyebrow">Замечания</p><span class="num" data-to="74">74</span><p class="cap">замечания к документации, из них 3 критических</p></div>
+      <div class="tile rv-el"><p class="eyebrow">Выпуск</p><span class="num" data-to="25">25</span><p class="cap">готовых документов для заказчика, ПТО и руководства</p></div>
+      <div class="tile ink rv-el"><p class="eyebrow">Сметы</p><span class="num" data-to="107.2" data-dec="1">107,2</span><p class="cap">млн ₽ смет закрытия проверено построчно</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec money" id="money">
+  <div class="wrap">
+    <div class="money-top rv-el">
+      <p class="eyebrow">03 · Пример проекта · Деньги</p>
+      <div class="toggle" role="group" aria-label="Режим резерва">
+        <button id="modeNow" aria-pressed="false">Сразу к предъявлению</button>
+        <button id="modeAll" aria-pressed="true">Весь резерв</button>
+      </div>
+    </div>
+    <p class="num hero-num rv-el"><span id="moneyBig">7,15</span> млн ₽</p>
+    <p class="sub rv-el" id="moneySub">резерв к стоимости закрытия по семи крупнейшим позициям — 6,7 % от проверенных смет на 107,2 млн ₽</p>
+    <div class="rbar grow-target" id="rbar">
+      <div class="rseg s1" style="flex-basis:39.7%" data-tip-b="2,84 млн ₽ · 39,7 %" data-tip="подтверждено документально — готово к включению в корректировку"></div>
+      <div class="rseg s2" style="flex-basis:27.7%" data-tip-b="1,98 млн ₽ · 27,7 %" data-tip="обосновано — требуется документальная привязка"></div>
+      <div class="rseg s3" style="flex-basis:32.6%" data-tip-b="2,33 млн ₽ · 32,6 %" data-tip="нужен конкретный документ — до получения не предъявляется"></div>
+    </div>
+    <div class="rlabels">
+      <div class="l1" style="flex-basis:39.7%"><span class="v">2,84 млн ₽</span><span class="t">подтверждено документально — готово к включению в корректировку</span></div>
+      <div class="l2" style="flex-basis:27.7%"><span class="v">1,98 млн ₽</span><span class="t">обосновано — требуется документальная привязка</span></div>
+      <div class="l3" style="flex-basis:32.6%"><span class="v">2,33 млн ₽</span><span class="t">нужен конкретный документ — до получения не предъявляется</span></div>
+    </div>
+    <p class="foot rv-el">По остальным позициям смет — дополнительный потенциал: покажем, какие документы собрать, чтобы его предъявить</p>
+  </div>
+</section>
+
+<section class="sec" id="remarks" data-nav="remarks">
+  <div class="wrap">
+    <div class="sec-head rv-el">
+      <div class="titles"><p class="eyebrow">03 · Пример проекта · Риски приёмки</p><h2>Замечания, которые стоят денег</h2></div>
+    </div>
+    <div class="rem">
+      <div class="rem-left rv-el">
+        <div><span class="num" data-to="74">74</span><p class="muted" style="font-size:20px;margin-top:10px">замечания к документации проекта</p></div>
+        <div>
+          <div class="split"><div class="c" tabindex="0" data-tip-b="3 критических" data-tip="Критические: качество раствора, документы на арматуру, скрытые работы по отоплению — основание удержать оплату"></div><div class="s"></div></div>
+          <div class="split-l"><span style="color:var(--terra)"><b>3</b> критических</span><span><b>71</b> существенное</span></div>
+        </div>
+        <p class="crit"><b>Критические:</b> качество раствора, документы на арматуру, скрытые работы по отоплению — основание удержать оплату</p>
+      </div>
+      <div class="chart grow-target" id="chart">
+        <div class="crow" id="r-oform" data-n="27" data-tip-b="27 из 74 · 36 %" data-tip="штамп и расшифровка подписи расходятся" style="--w:100%"><span class="nm">Оформление и реквизиты<span class="ex">штамп и расшифровка подписи расходятся</span></span><span class="n">27</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+        <div class="crow" id="r-obem" data-n="14" data-tip-b="14 из 74 · 19 %" data-tip="объём в акте не подтверждён схемой" style="--w:51.9%"><span class="nm">Объёмы<span class="ex">объём в акте не подтверждён схемой</span></span><span class="n">14</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+        <div class="crow" id="r-kach" data-n="13" data-tip-b="13 из 74 · 18 %" data-tip="нет документа о качестве на партию" style="--w:48.1%"><span class="nm">Качество материалов<span class="ex">нет документа о качестве на партию</span></span><span class="n">13</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+        <div class="crow" id="r-kompl" data-n="11" data-tip-b="11 из 74 · 15 %" data-tip="нет актов скрытых работ и испытаний" style="--w:40.7%"><span class="nm">Комплектность<span class="ex">нет актов скрытых работ и испытаний</span></span><span class="n">11</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+        <div class="crow" id="r-cross" data-n="7" data-tip-b="7 из 74 · 9 %" data-tip="даты и номера актов не сходятся" style="--w:25.9%"><span class="nm">Перекрёстные расхождения<span class="ex">даты и номера актов не сходятся</span></span><span class="n">7</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+        <div class="crow" id="r-reg" data-n="2" data-tip-b="2 из 74 · 3 %" data-tip="журнал работ не соответствует актам" style="--w:7.4%"><span class="nm">Реестры и журналы<span class="ex">журнал работ не соответствует актам</span></span><span class="n">2</span><span class="track"><span class="bar" style="display:block"></span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec final" id="start" data-nav="start">
+  <div class="wrap">
+    <div class="final-grid">
+      <div class="rv-el">
+        <p class="eyebrow">Первый шаг</p>
+        <h2>Начнём с одного объекта</h2>
+        <ol class="steps">
+          <li><span class="i">01</span><span>Передаёте комплект в любом виде</span></li>
+          <li><span class="i">02</span><span>Проверяем 100 % документов</span></li>
+          <li><span class="i">03</span><span>Получаете деньги, риски и план действий</span></li>
+        </ol>
+      </div>
+      <div class="final-art" id="finalArt"><canvas id="qNight" role="img" aria-label="Тот же квартал ночью"></canvas></div>
+    </div>
+    <p class="foot-line">Машинный аудит документации ПТО</p>
+  </div>
+</section>
+</main>
+
+<div class="tip" id="tip" role="tooltip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fmt = (v, dec) => v.toLocaleString('ru-RU', {minimumFractionDigits: dec, maximumFractionDigits: dec});
+const easeOut = t => 1 - Math.pow(1 - t, 3);
+
+/* ---------------- Isometric quarter ---------------- */
+const C30 = Math.cos(Math.PI / 6), FH = 0.62;
+function rng(seed){ let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296; }
+function inPoly(px, py, pts){ let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++){ const [xi, yi] = pts[i], [xj, yj] = pts[j]; if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi)) c = !c; } return c; }
+
+class Quarter {
+  constructor(canvas, night){
+    this.cv = canvas; this.ctx = canvas.getContext('2d'); this.night = night;
+    const base = [
+      {x:-6,y:-5,w:4,d:3,f:18},{x:-1,y:-7,w:3,d:3,f:24},{x:3,y:-4,w:4,d:3,f:14},{x:-6,y:0,w:3,d:4,f:10},
+      {x:-1,y:-2,w:4,d:4,f:22,scan:true},{x:4,y:1,w:3,d:3,f:8},{x:-3,y:4,w:5,d:3,f:6},{x:2,y:4,w:3,d:3,f:12}
+    ];
+    const R = rng(night ? 77 : 7);
+    this.houses = base.map((h, i) => ({...h, cx:h.x + h.w/2, cy:h.y + h.d/2, lift:0, hov:0, sweep:0, ox:0, oy:0, flash:new Map(), lit:new Set(), order:i}));
+    this.houses.sort((a, b) => (a.cx + a.cy) - (b.cx + b.cy));
+    this.houses.forEach((h, i) => { h.order = i; h.phase = i / this.houses.length;
+      if (night) for (let r = 0; r < h.f; r++){ for (let c = 0; c < h.w*2; c++) if (R() < .2) h.lit.add('L:'+r+':'+c); for (let c = 0; c < h.d*2; c++) if (R() < .2) h.lit.add('R:'+r+':'+c); } });
+    this.scan = this.houses.find(h => h.scan);
+    this.c0 = {x: this.scan.cx, y: this.scan.cy};
+    this.points = [{x:-8,y:6},{x:7,y:-6},{x:8,y:6}];
+    this.mouse = {x:0, y:0, tx:0, ty:0};
+    this.hovered = null; this.spread = 0; this.spreadT = 0; this.planeHot = 0;
+    this.t0 = performance.now(); this.last = this.t0; this.lastRow = -1; this.running = false; this.visible = true;
+    this.nightPass = night ? -1 : 0; // -1 = waiting, 0..1 progress
+    this.col = night ? {line:'rgba(233,228,219,.85)', thin:'rgba(233,228,219,.28)', top:'#2A2E32', left:'#24282C', right:'#1F2226', grid:'rgba(80,86,92,.55)', acc:'#E2B59B', lit:'rgba(232,182,122,.55)'}
+                     : {line:'#1C1E20', thin:'rgba(28,30,32,.33)', top:'#FBFAF6', left:'#EFEAE2', right:'#E2DBD0', grid:'rgba(190,180,164,.55)', acc:'#A9502B', lit:null};
+    this.resize(); new ResizeObserver(() => this.resize()).observe(canvas.parentElement);
+    canvas.addEventListener('pointermove', e => this.onMove(e));
+    canvas.addEventListener('pointerleave', () => { this.hovered = null; this.spreadT = 0; this.cv.style.cursor = ''; });
+    window.addEventListener('pointermove', e => { const r = this.cv.getBoundingClientRect(); this.mouse.tx = Math.max(-1, Math.min(1, (e.clientX - (r.left + r.width/2)) / (r.width))); this.mouse.ty = Math.max(-1, Math.min(1, (e.clientY - (r.top + r.height/2)) / (r.height))); }, {passive:true});
+    new IntersectionObserver(es => es.forEach(en => { this.visible = en.isIntersecting; if (this.visible){ if (this.night && this.nightPass < 0) { this.nightPass = 0; this.passStart = performance.now(); } this.start(); } }), {threshold:.25}).observe(canvas);
+    this.start();
+  }
+  resize(){
+    const p = this.cv.parentElement.getBoundingClientRect(); const dpr = Math.min(2, window.devicePixelRatio || 1);
+    this.W = p.width; this.H = p.height; this.cv.width = Math.round(p.width * dpr); this.cv.height = Math.round(p.height * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // fit
+    const pts = []; const G = 9;
+    [[-G,-G],[G,-G],[G,G],[-G,G]].forEach(([x,y]) => pts.push([(x-y)*C30, (x+y)*.5]));
+    this.houses.forEach(h => { const H = h.f*FH; let ex = 0, ey = 0; if (h !== this.scan){ const vx = h.cx - this.c0.x, vy = h.cy - this.c0.y, L = Math.hypot(vx, vy) || 1, far = Math.min(1.25, .75 + L/14); ex = vx/L*2.4*far; ey = vy/L*2.4*far; } [[h.x,h.y],[h.x+h.w,h.y],[h.x,h.y+h.d],[h.x+h.w,h.y+h.d]].forEach(([x,y]) => { pts.push([(x-y)*C30, (x+y)*.5 - H]); pts.push([(x+ex-y-ey)*C30, (x+ex+y+ey)*.5 - H - .3]); pts.push([(x+ex-y-ey)*C30, (x+ex+y+ey)*.5]); }); });
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const minx = Math.min(...xs), maxx = Math.max(...xs), miny = Math.min(...ys), maxy = Math.max(...ys);
+    this.s = Math.min(this.W / ((maxx - minx) * 1.1), this.H / ((maxy - miny) * 1.08));
+    this.ox = this.W/2 - (minx + maxx)/2 * this.s; this.oy = this.H/2 - (miny + maxy)/2 * this.s;
+    if (!this.running) this.draw(performance.now());
+  }
+  P(x, y, z, dx = 0, dy = 0){ return [this.ox + dx + (x - y) * C30 * this.s, this.oy + dy + (x + y) * .5 * this.s - z * this.s]; }
+  start(){ if (this.running) return; this.running = true; this.last = performance.now(); const loop = now => { if (!this.visible && !this.needsFrame){ this.running = false; return; } this.draw(now); requestAnimationFrame(loop); }; requestAnimationFrame(loop); }
+  houseGeom(h, grow){
+    const H = h.f * FH * grow, x = h.x + h.ox, y = h.y + h.oy;
+    const pdx = this.mouse.x * 6, pdy = this.mouse.y * 4 - h.lift;
+    const P = (X, Y, Z) => this.P(X, Y, Z, pdx, pdy);
+    return {H, x, y, P,
+      R:[P(x+h.w,y,0),P(x+h.w,y+h.d,0),P(x+h.w,y+h.d,H),P(x+h.w,y,H)],
+      L:[P(x,y+h.d,0),P(x+h.w,y+h.d,0),P(x+h.w,y+h.d,H),P(x,y+h.d,H)],
+      T:[P(x,y,H),P(x+h.w,y,H),P(x+h.w,y+h.d,H),P(x,y+h.d,H)]};
+  }
+  planePoly(z){
+    const h = this.scan, m = .6, x = h.x + h.ox, y = h.y + h.oy;
+    const pdx = this.mouse.x * 12, pdy = this.mouse.y * 8 - h.lift;
+    return [this.P(x-m,y-m,z,pdx,pdy), this.P(x+h.w+m,y-m,z,pdx,pdy), this.P(x+h.w+m,y+h.d+m,z,pdx,pdy), this.P(x-m,y+h.d+m,z,pdx,pdy)];
+  }
+  onMove(e){
+    const r = this.cv.getBoundingClientRect(); const px = e.clientX - r.left, py = e.clientY - r.top;
+    let hit = null;
+    if (this.planeZ != null && this.planeAlpha > .3 && inPoly(px, py, this.planePoly(this.planeZ))) { this.spreadT = 1; this.hovered = null; this.cv.style.cursor = 'pointer'; return; }
+    this.spreadT = 0;
+    for (let i = this.houses.length - 1; i >= 0; i--){ const g = this.houses[i]._g; if (!g) continue; if (inPoly(px,py,g.R) || inPoly(px,py,g.L) || inPoly(px,py,g.T)){ hit = this.houses[i]; break; } }
+    this.hovered = hit; this.cv.style.cursor = hit ? 'pointer' : '';
+  }
+  poly(pts, fill, stroke, lw){ const c = this.ctx; c.beginPath(); c.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) c.lineTo(pts[i][0], pts[i][1]); c.closePath(); if (fill){ c.fillStyle = fill; c.fill(); } if (stroke){ c.strokeStyle = stroke; c.lineWidth = lw || 1; c.stroke(); } }
+  line(a, b, stroke, lw){ const c = this.ctx; c.beginPath(); c.moveTo(a[0], a[1]); c.lineTo(b[0], b[1]); c.strokeStyle = stroke; c.lineWidth = lw; c.stroke(); }
+  draw(now){
+    const c = this.ctx, col = this.col; const dt = Math.min(.05, (now - this.last) / 1000); this.last = now;
+    const t = reduced ? 99 : (now - this.t0) / 1000;
+    const k = 1 - Math.exp(-dt * 7);
+    this.mouse.x += (this.mouse.tx - this.mouse.x) * (reduced ? 0 : k * .6);
+    this.mouse.y += (this.mouse.ty - this.mouse.y) * (reduced ? 0 : k * .6);
+    this.spreadP = this.spreadP || 0; { const sp = dt / 1.1; this.spreadP = reduced ? this.spreadT : (this.spreadT > this.spreadP ? Math.min(this.spreadT, this.spreadP + sp) : Math.max(this.spreadT, this.spreadP - sp)); } this.spread = this.spreadP < .5 ? 4*this.spreadP**3 : 1 - Math.pow(-2*this.spreadP + 2, 3)/2;
+    this.planeHot += ((this.spreadT ? 1 : 0) - this.planeHot) * (reduced ? 1 : k);
+    c.clearRect(0, 0, this.W, this.H);
+    // ground grid
+    const G = 9; c.lineWidth = 1;
+    for (let i = -G; i <= G; i++){
+      const a = .25 + (i % 3 === 0 ? .35 : 0);
+      c.globalAlpha = a; this.line(this.P(i,-G,0), this.P(i,G,0), col.grid, 1); this.line(this.P(-G,i,0), this.P(G,i,0), col.grid, 1);
+    }
+    c.globalAlpha = 1;
+    // survey points
+    this.points.forEach((p, i) => { const q = this.P(p.x, p.y, 0); const ph = reduced ? 0 : ((t * .5 + i * .33) % 1);
+      c.beginPath(); c.arc(q[0], q[1], 5.5, 0, 7); c.strokeStyle = col.acc; c.lineWidth = 1.5; c.stroke();
+      c.beginPath(); c.arc(q[0], q[1], 2, 0, 7); c.fillStyle = col.acc; c.fill();
+      if (!reduced){ c.globalAlpha = (1 - ph) * .6; c.beginPath(); c.arc(q[0], q[1], 6 + ph * 14, 0, 7); c.stroke(); c.globalAlpha = 1; } });
+    // scan plane height
+    const sH = this.scan.f * FH; let z, alpha = 1;
+    if (this.night){
+      if (this.nightPass < 0) { z = null; alpha = 0; }
+      else { const p = reduced ? 1 : Math.min(1, (now - this.passStart) / 3800); z = sH * easeOut(p) * .98 + .05; alpha = p < .85 ? 1 : Math.max(0, 1 - (p - .85) / .15); if (p >= 1) alpha = 0; }
+    } else {
+      z = reduced ? sH * .55 : FH * 2 + (sH * .92 - FH * 2) * (.5 - .5 * Math.cos(t * 2 * Math.PI / 9));
+    }
+    this.planeZ = z; this.planeAlpha = alpha;
+    // flash bookkeeping
+    if (z != null && alpha > 0 && !reduced){ const row = Math.floor(z / FH); if (row !== this.lastRow && row >= 0 && row < this.scan.f){ for (let cc = 0; cc < this.scan.w*2; cc++) this.scan.flash.set('L:'+row+':'+cc, 1); for (let cc = 0; cc < this.scan.d*2; cc++) this.scan.flash.set('R:'+row+':'+cc, 1); this.lastRow = row; } }
+    // houses
+    const n = this.houses.length; let anyAnim = false;
+    this.houses.forEach((h, i) => {
+      const gStart = i * .1, grow = reduced ? 1 : easeOut(Math.max(0, Math.min(1, (t - .1 - gStart) / .8)));
+      if (grow < 1) anyAnim = true;
+      // breathing
+      let br = 0; if (!reduced && grow >= 1){ const ph = (t * .22 + h.phase) % 1; if (ph < .14) br = 3 * Math.sin(ph / .14 * Math.PI); }
+      const isH = this.hovered === h; h.hov += ((isH ? 1 : 0) - h.hov) * (reduced ? 1 : k);
+      h.sweep = isH ? Math.min(1, h.sweep + dt / .6) : h.sweep * (1 - k); if (reduced) h.sweep = isH ? 1 : 0;
+      h.lift = br + h.hov * 9 + (h === this.scan ? 0 : Math.sin(this.spread * Math.PI) * 6);
+      // spread
+      let tx = 0, ty = 0; if (h !== this.scan){ const vx = h.cx - this.c0.x, vy = h.cy - this.c0.y, L = Math.hypot(vx, vy) || 1; const far = Math.min(1.25, .75 + L / 14); const sp = this.spread * 2.4 * far; tx = vx / L * sp; ty = vy / L * sp; }
+      h.ox = tx; h.oy = ty;
+      for (const [key, v] of h.flash){ const nv = v * Math.exp(-dt / .45); if (nv < .02) h.flash.delete(key); else h.flash.set(key, nv); }
+      const g = this.houseGeom(h, grow); h._g = g; const {H, x, y, P} = g;
+      if (H <= 0.001) return;
+      this.poly(g.R, col.right); this.poly(g.L, col.left);
+      const rows = Math.floor(h.f * grow), rh = FH;
+      // lit windows / flashes
+      const cell = (face, r, cc, fill) => { const z0 = r * rh, z1 = Math.min(H, (r + 1) * rh); if (z0 >= H) return; let pts;
+        if (face === 'L'){ const X0 = x + cc * .5, X1 = X0 + .5; pts = [P(X0,y+h.d,z0),P(X1,y+h.d,z0),P(X1,y+h.d,z1),P(X0,y+h.d,z1)]; }
+        else { const Y0 = y + cc * .5, Y1 = Y0 + .5; pts = [P(x+h.w,Y0,z0),P(x+h.w,Y1,z0),P(x+h.w,Y1,z1),P(x+h.w,Y0,z1)]; }
+        this.poly(pts, fill); };
+      if (col.lit) for (const key of h.lit){ const [f, r, cc] = key.split(':'); cell(f, +r, +cc, col.lit); }
+      for (const [key, v] of h.flash){ const [f, r, cc] = key.split(':'); c.globalAlpha = v * .8; cell(f, +r, +cc, col.acc); c.globalAlpha = 1; }
+      // hover sweep (facade lit from below)
+      if (h.sweep > .01){ const zt = H * easeOut(h.sweep); c.globalAlpha = .16 * Math.max(h.hov, .2);
+        this.poly([P(x+h.w,y,0),P(x+h.w,y+h.d,0),P(x+h.w,y+h.d,zt),P(x+h.w,y,zt)], col.acc);
+        this.poly([P(x,y+h.d,0),P(x+h.w,y+h.d,0),P(x+h.w,y+h.d,zt),P(x,y+h.d,zt)], col.acc); c.globalAlpha = 1; }
+      // floor lines
+      c.lineWidth = .6;
+      for (let r = 1; r < rows; r++){ const zz = r * rh; if (zz >= H) break; c.beginPath(); const a = P(x,y+h.d,zz), b = P(x+h.w,y+h.d,zz), d = P(x+h.w,y,zz); c.moveTo(a[0],a[1]); c.lineTo(b[0],b[1]); c.lineTo(d[0],d[1]); c.strokeStyle = col.thin; c.stroke(); }
+      for (let q = 1; q < h.w*2; q++){ const X = x + q*.5; this.line(P(X,y+h.d,0), P(X,y+h.d,H), col.thin, .5); }
+      for (let q = 1; q < h.d*2; q++){ const Y = y + q*.5; this.line(P(x+h.w,Y,0), P(x+h.w,Y,H), col.thin, .5); }
+      this.poly(g.R, null, col.line, 1.3); this.poly(g.L, null, col.line, 1.3);
+      this.poly(g.T, col.top, col.line, 1.3);
+      if (h === this.scan && z != null && alpha > 0 && z <= H + .01){
+        const pp = this.planePoly(z); c.globalAlpha = alpha;
+        this.poly(pp, this.night ? 'rgba(226,181,155,'+(.16 + .12*this.planeHot)+')' : 'rgba(169,80,43,'+(.15 + .12*this.planeHot)+')', col.acc, 2 + this.planeHot);
+        for (let q = 1; q < 8; q++){ const f = q / 8; const a = [pp[0][0] + (pp[1][0]-pp[0][0])*f, pp[0][1] + (pp[1][1]-pp[0][1])*f]; const b = [pp[3][0] + (pp[2][0]-pp[3][0])*f, pp[3][1] + (pp[2][1]-pp[3][1])*f]; c.globalAlpha = alpha * .55; this.line(a, b, col.acc, .8); }
+        c.globalAlpha = 1;
+      }
+    });
+    // ruler at right edge following plane
+    const sg = this.scan._g; if (sg){
+      const rx = this.W - 18, y0 = this.P(this.scan.x + this.scan.w + this.scan.ox, this.scan.y + this.scan.d + this.scan.oy, 0)[1] - this.scan.lift + this.mouse.y*4, y1 = y0 - sH * this.s;
+      this.line([rx, y0], [rx, y1], col.acc, 1.4); this.line([rx-8, y0], [rx+8, y0], col.acc, 1.4); this.line([rx-8, y1], [rx+8, y1], col.acc, 1.4);
+      for (let r = 1; r < this.scan.f; r++){ const yy = y0 - r * FH * this.s; this.line([rx - (r % 5 ? 4 : 8), yy], [rx, yy], col.acc, .9); }
+      if (z != null && alpha > 0){ const ym = y0 - z * this.s; c.globalAlpha = alpha; c.beginPath(); c.moveTo(rx - 4, ym); c.lineTo(rx - 14, ym - 6); c.lineTo(rx - 14, ym + 6); c.closePath(); c.fillStyle = col.acc; c.fill(); this.line([rx - 4, ym], [rx + 8, ym], col.acc, 2); c.globalAlpha = 1; }
+    }
+    this.needsFrame = anyAnim || Math.abs((this.spreadP||0) - this.spreadT) > .002 || this.houses.some(h => h.hov > .01 || h.flash.size);
+  }
+}
+
+const heroCv = document.getElementById('qDay'), nightCv = document.getElementById('qNight');
+if (heroCv.getContext) { new Quarter(heroCv, false); new Quarter(nightCv, true); }
+// scroll parallax for hero art
+const heroArt = document.getElementById('heroArt');
+if (!reduced){ let ticking = false; addEventListener('scroll', () => { if (ticking) return; ticking = true; requestAnimationFrame(() => { const y = Math.min(scrollY, 900); heroArt.style.transform = 'translateY(' + (y * .22).toFixed(1) + 'px)'; ticking = false; }); }, {passive:true}); }
+
+/* ---------------- Reveal, count-up, bar growth ---------------- */
+const vh = () => innerHeight || 800;
+const countEls = [...document.querySelectorAll('[data-to]')];
+function runCount(el){ if (el._done) return; el._done = true; const to = parseFloat(el.dataset.to), dec = +(el.dataset.dec || 0); if (reduced){ el.textContent = fmt(to, dec); return; } const t0 = performance.now(), D = 1200; const step = now => { const p = Math.min(1, (now - t0) / D); el.textContent = fmt(to * easeOut(p), dec); if (p < 1) requestAnimationFrame(step); }; el.textContent = fmt(0, dec); requestAnimationFrame(step); }
+if ('IntersectionObserver' in window){
+  const revealEls = [...document.querySelectorAll('.rv-el')];
+  revealEls.forEach(el => { el.classList.add('rv'); if (!reduced && el.getBoundingClientRect().top > vh() * .92) el.classList.add('pre'); });
+  // stagger within the same parent
+  const io = new IntersectionObserver(es => es.forEach(en => { if (!en.isIntersecting) return; const el = en.target; io.unobserve(el);
+    const sibs = [...el.parentElement.children].filter(s => s.classList.contains('pre')); const idx = Math.max(0, sibs.indexOf(el));
+    setTimeout(() => el.classList.remove('pre'), idx * 70); }), {threshold:.12, rootMargin:'0px 0px -6% 0px'});
+  revealEls.forEach(el => io.observe(el));
+  const cio = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ cio.unobserve(en.target); runCount(en.target); } }), {threshold:.4});
+  countEls.forEach(el => cio.observe(el));
+  document.querySelectorAll('.grow-target').forEach(el => { if (reduced) return; if (el.getBoundingClientRect().top > vh() * .9){ el.classList.add('grow-pre');
+    const items = el.querySelectorAll('.bar, .rseg'); items.forEach((b, i) => { b.style.transition = 'transform .9s cubic-bezier(.2,.7,.2,1) ' + (i * 90) + 'ms, background .25s, height .25s, opacity .25s, flex-basis .6s'; });
+    const gio = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ gio.disconnect(); el.classList.remove('grow-pre'); setTimeout(() => items.forEach(b => b.style.transition = ''), 1600); } }), {threshold:.3}); gio.observe(el); } });
+  // nav highlight
+  const links = [...document.querySelectorAll('.nav a')];
+  const nio = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting){ const id = en.target.dataset.nav; links.forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + id)); } }), {rootMargin:'-45% 0px -50% 0px'});
+  document.querySelectorAll('[data-nav]').forEach(s => nio.observe(s));
+}
+
+/* ---------------- Tooltips ---------------- */
+const tip = document.getElementById('tip'); let tipTimer = null, tipEl = null;
+function tipContent(el){ const b = el.dataset.tipB ? '<span class="tb"></span>' : ''; tip.innerHTML = b + (el.dataset.tipHtml || '<span class="tx"></span>'); if (el.dataset.tipB) tip.querySelector('.tb').textContent = el.dataset.tipB; if (!el.dataset.tipHtml) tip.querySelector('.tx').textContent = el.dataset.tip || ''; }
+function placeTip(x, y){ const r = tip.getBoundingClientRect(); let lx = x + 16, ly = y + 18; if (lx + r.width > innerWidth - 12) lx = x - r.width - 16; if (lx < 12) lx = 12; if (ly + r.height > innerHeight - 12) ly = y - r.height - 14; tip.style.left = lx + 'px'; tip.style.top = Math.max(12, ly) + 'px'; }
+function showTip(el, x, y){ clearTimeout(tipTimer); tipTimer = setTimeout(() => { tipEl = el; tipContent(el); tip.classList.add('show'); placeTip(x, y); }, 150); }
+function hideTip(){ clearTimeout(tipTimer); tip.classList.remove('show'); tipEl = null; }
+document.querySelectorAll('[data-tip], [data-tip-html]').forEach(el => {
+  el.addEventListener('pointerenter', e => { if (e.pointerType === 'touch') return; showTip(el, e.clientX, e.clientY); });
+  el.addEventListener('pointermove', e => { if (e.pointerType === 'touch') return; if (tipEl === el) placeTip(e.clientX, e.clientY); else if (!tipTimer) showTip(el, e.clientX, e.clientY); });
+  el.addEventListener('pointerleave', hideTip);
+  el.addEventListener('focus', () => { const r = el.getBoundingClientRect(); showTip(el, r.left + r.width / 2, r.bottom); });
+  el.addEventListener('blur', hideTip);
+  el.addEventListener('pointerup', e => { if (e.pointerType !== 'touch') return; if (tipEl === el){ hideTip(); return; } const r = el.getBoundingClientRect(); showTip(el, Math.min(e.clientX, innerWidth - 40), r.bottom); });
+});
+addEventListener('scroll', () => { if (tipEl && matchMedia('(hover: none)').matches) hideTip(); }, {passive:true});
+
+/* ---------------- Jumps and chart highlight ---------------- */
+const chart = document.getElementById('chart'); const rows = [...chart.querySelectorAll('.crow')];
+function activate(row){ rows.forEach(r => r.classList.toggle('on', r === row)); chart.classList.toggle('has-active', !!row); }
+rows.forEach(r => { r.addEventListener('pointerenter', () => activate(r)); r.addEventListener('pointerleave', () => activate(null)); });
+const go = id => document.getElementById(id).scrollIntoView({behavior: reduced ? 'auto' : 'smooth', block: 'center'});
+document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { const row = document.getElementById(b.dataset.goto); go(b.dataset.goto); setTimeout(() => { activate(row); row.classList.add('flash'); setTimeout(() => { row.classList.remove('flash'); activate(null); }, 1800); }, reduced ? 0 : 650); }));
+document.querySelectorAll('[data-jump]').forEach(t => { const f = () => document.getElementById(t.dataset.jump).scrollIntoView({behavior: reduced ? 'auto' : 'smooth'}); t.addEventListener('click', f); t.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); f(); } }); });
+
+/* ---------------- Reserve bar ---------------- */
+const rbar = document.getElementById('rbar'), money = document.getElementById('money');
+rbar.querySelectorAll('.rseg').forEach(s => { s.addEventListener('pointerenter', () => { s.classList.add('on'); rbar.classList.add('dim'); }); s.addEventListener('pointerleave', () => { s.classList.remove('on'); rbar.classList.remove('dim'); }); });
+const bNow = document.getElementById('modeNow'), bAll = document.getElementById('modeAll'), big = document.getElementById('moneyBig'), sub = document.getElementById('moneySub');
+function mode(now){ money.classList.toggle('now', now); bNow.setAttribute('aria-pressed', now); bAll.setAttribute('aria-pressed', !now);
+  big.textContent = now ? '2,84' : '7,15';
+  sub.textContent = now ? 'подтверждено документально — готово к включению в корректировку уже сейчас' : 'резерв к стоимости закрытия по семи крупнейшим позициям — 6,7 % от проверенных смет на 107,2 млн ₽'; }
+bNow.addEventListener('click', () => mode(true)); bAll.addEventListener('click', () => mode(false));
+})();
+</script>
+
+</body>
+</html>
